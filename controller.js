@@ -22,7 +22,6 @@ jdbc.initialize(function (err) {
     }
 });
 
-var asyncjs = require('async');
 var express = require('express');
 var router = express.Router();
 var bodyParser = require('body-parser');
@@ -31,13 +30,18 @@ var sql = require('./sql.json');
 router.use(bodyParser.urlencoded({extended: true}));
 
 router.get('*', function (req, res) {
-    var pathname = req.originalUrl.replace('/api','');
+    var path = req.originalUrl.replace('/api','').split('/');
+    var pathname = path[1];
     var request = '';
     switch (pathname) {
-        case '/tours':
+        case 'tours':
             request = sql.tours;
             break;
-        case '/orders':
+        case 'tour':
+            request = sql.tour + path[2];
+            console.log(request);
+            break;
+        case 'orders':
             request = sql.orders;
             break;
         case 'products':
@@ -48,7 +52,6 @@ router.get('*', function (req, res) {
     }
     if (request !== '') {
         jdbc.reserve(function (err, connObj) {
-            asyncjs.series([function (callback) {
                 var conn = connObj.conn;
                 conn.createStatement(function (err, statement) {
                     if (err) {
@@ -63,18 +66,15 @@ router.get('*', function (req, res) {
                                         if (!isEmptyObject(data)) {
                                             res.status(200).send(data);
                                         }
-                                        callback(null, resultset);
                                     });
                                 }
                             });
                     }
                 });
-            }], function (err, res) {
-                jdbc.release(connObj, function (err) {
-                    if (err) {
-                        res.status(400).send(err);
-                    }
-                });
+            jdbc.release(connObj, function (err) {
+                if (err) {
+                    res.status(400).send(err);
+                }
             });
         });
     } else {

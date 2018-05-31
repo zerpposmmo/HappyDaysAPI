@@ -1,5 +1,6 @@
 {
   "tours": "SELECT * FROM TOURNEE",
+  "tour": "SELECT * FROM COLIS WHERE TOURNEE_ID =",
   "products": "SELECT * FROM PRODUIT",
   "orders": "SELECT * FROM COMMANDE"
 }
