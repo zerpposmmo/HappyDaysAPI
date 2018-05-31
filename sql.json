@@ -1,0 +1,5 @@
+{
+  "tours": "SELECT * FROM TOURNEE",
+  "products": "SELECT * FROM PRODUIT",
+  "orders": "SELECT * FROM COMMANDE"
+}
