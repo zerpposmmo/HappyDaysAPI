@@ -39,10 +39,12 @@ router.get('*', function (req, res) {
             break;
         case 'tour':
             request = sql.tour + path[2];
-            console.log(request);
             break;
         case 'orders':
             request = sql.orders;
+            break;
+        case 'order':
+            request = sql.order + path[2];
             break;
         case 'products':
             request = sql.products;
