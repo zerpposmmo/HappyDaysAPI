@@ -13,3 +13,7 @@ npm install
 ```
 npm run start
 ```
+
+# Add a new query
+
+Add your SQL query in the sql.json file, then add your pathname's case in the controller.
