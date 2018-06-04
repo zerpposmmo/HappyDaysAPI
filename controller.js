@@ -33,6 +33,7 @@ router.get('*', function (req, res) {
     var path = req.originalUrl.replace('/api','').split('/');
     var pathname = path[1];
     var request = '';
+    var group = '';
     switch (pathname) {
         case 'tours':
             request = sql.tours;
@@ -45,6 +46,14 @@ router.get('*', function (req, res) {
             break;
         case 'order':
             request = sql.order + path[2];
+            break;
+        case 'package':
+            request = sql.package + path[2];
+            group = 'COLIS_ID';
+            break;
+        case 'product':
+            request = sql.products;
+            request = sql.product + path[2];
             break;
         case 'products':
             request = sql.products;
@@ -66,6 +75,9 @@ router.get('*', function (req, res) {
                                 } else {
                                     resultset.toObjArray(function (err, data) {
                                         if (!isEmptyObject(data)) {
+                                            if(group !== '') {
+                                                data = groupBy(data, group);
+                                            }
                                             res.status(200).send(data);
                                         }
                                     });
@@ -96,9 +108,9 @@ function isEmptyObject(obj) {
 }
 
 
-var groupBy = function (xs, key) {
+function groupBy(xs, key) {
     return xs.reduce(function (rv, x) {
         (rv[x[key]] = rv[x[key]] || []).push(x);
         return rv;
     }, {});
-};
+}
