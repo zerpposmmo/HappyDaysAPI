@@ -35,17 +35,15 @@ router.get('*', function (req, res) {
     var request = '';
     var group = '';
     switch (pathname) {
-        case 'tours':
-            request = sql.tours;
-            break;
-        case 'tour':
-            request = sql.tour + path[2];
-            break;
-        case 'orders':
-            request = sql.orders;
+        case 'navigate':
+            request = sql.navigate + path[2] + ' ORDER BY CHEMINPRODUIT.ORDRE';
+            group = 'TOURNEE_ID';
             break;
         case 'order':
             request = sql.order + path[2];
+            break;
+        case 'orders':
+            request = sql.orders;
             break;
         case 'package':
             request = sql.package + path[2];
@@ -57,6 +55,12 @@ router.get('*', function (req, res) {
             break;
         case 'products':
             request = sql.products;
+            break;
+        case 'tours':
+            request = sql.tours;
+            break;
+        case 'tour':
+            request = sql.tour + path[2];
             break;
         default:
             break;
