@@ -37,7 +37,7 @@ router.get('*', function (req, res) {
     switch (pathname) {
         case 'navigate':
             request = sql.navigate + path[2] + ' ORDER BY CHEMINPRODUIT.ORDRE';
-            group = 'TOURNEE_ID';
+            //group = 'TOURNEE_ID';
             break;
         case 'order':
             request = sql.order + path[2] + ' ORDER BY LIGNE.PRODUIT_ID';
