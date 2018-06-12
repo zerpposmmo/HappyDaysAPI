@@ -40,17 +40,16 @@ router.get('*', function (req, res) {
             group = 'TOURNEE_ID';
             break;
         case 'order':
-            request = sql.order + path[2];
+            request = sql.order + path[2] + ' ORDER BY LIGNE.PRODUIT_ID';
             break;
         case 'orders':
             request = sql.orders;
             break;
         case 'package':
             request = sql.package + path[2];
-            group = 'COLIS_ID';
+            //group = 'COLIS_ID';
             break;
         case 'product':
-            request = sql.products;
             request = sql.product + path[2];
             break;
         case 'products':
