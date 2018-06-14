@@ -29,11 +29,29 @@ var bodyParser = require('body-parser');
 var sql = require('./sql.json');
 router.use(bodyParser.urlencoded({extended: true}));
 
-router.get('*', function (req, res) {
-    var path = req.originalUrl.replace('/api','').split('/');
+router.post('*', function (req, res) {
+    var path = req.originalUrl.replace('/api', '').split('/');
     var pathname = path[1];
     var request = '';
-    var group = '';
+    var type = 'UPDATE';
+    switch (pathname) {
+        case 'updateTour':
+            request = sql.updateTour + path[2];
+            break;
+        case 'resetTour':
+            request = sql.resetTour + path[2];
+            break;
+        default:
+            break;
+    }
+    executeStatement(request, res, pathname, type);
+});
+
+router.get('*', function (req, res) {
+    var path = req.originalUrl.replace('/api', '').split('/');
+    var pathname = path[1];
+    var request = '';
+    var type = 'SELECT';
     switch (pathname) {
         case 'navigate':
             request = sql.navigate + path[2] + ' ORDER BY CHEMINPRODUIT.ORDRE';
@@ -64,39 +82,7 @@ router.get('*', function (req, res) {
         default:
             break;
     }
-    if (request !== '') {
-        jdbc.reserve(function (err, connObj) {
-                var conn = connObj.conn;
-                conn.createStatement(function (err, statement) {
-                    if (err) {
-                        res.status(400).send(err);
-                    } else {
-                        statement.executeQuery(request,
-                            function (err, resultset) {
-                                if (err) {
-                                    res.status(400).send(err);
-                                } else {
-                                    resultset.toObjArray(function (err, data) {
-                                        if (!isEmptyObject(data)) {
-                                            if(group !== '') {
-                                                data = groupBy(data, group);
-                                            }
-                                            res.status(200).send(data);
-                                        }
-                                    });
-                                }
-                            });
-                    }
-                });
-            jdbc.release(connObj, function (err) {
-                if (err) {
-                    res.status(400).send(err);
-                }
-            });
-        });
-    } else {
-        res.status(404).send('Unknown route ' + pathname);
-    }
+    executeStatement(request, res, pathname, type);
 
 });
 module.exports = router;
@@ -110,10 +96,53 @@ function isEmptyObject(obj) {
     return true;
 }
 
+function executeStatement(request, res, pathname, type) {
+    if (request !== '') {
+        jdbc.reserve(function (err, connObj) {
+            var conn = connObj.conn;
+            conn.createStatement(function (err, statement) {
+                if (err) {
+                    res.status(400).send(err);
+                } else {
+                    switch (type) {
+                        case 'SELECT':
+                            statement.executeQuery(request,
+                                function (err, resultset) {
+                                    if (err) {
+                                        res.status(400).send(err.toString());
+                                    } else {
+                                        resultset.toObjArray(function (err, data) {
+                                            if (!isEmptyObject(data)) {
+                                                res.status(200).send(data);
+                                            }
+                                        });
+                                    }
+                                });
+                            break;
+                        case 'UPDATE':
+                            statement.executeUpdate(request,
+                                function (err, resultset) {
+                                    if (err) {
+                                        res.status(400).send(err.toString());
+                                    } else {
+                                        res.status(200).send(resultset.toString());
+                                    }
+                                });
+                            break;
+                        default:
+                            res.status(400).send('Unknown route ' + pathname);
+                            break;
+                    }
+                }
+            });
+            jdbc.release(connObj, function (err) {
+                if (err) {
+                    res.status(400).send(err.toString());
+                }
+            });
+        });
+    } else {
+        res.status(404).send('Unknown route ' + pathname);
+    }
 
-function groupBy(xs, key) {
-    return xs.reduce(function (rv, x) {
-        (rv[x[key]] = rv[x[key]] || []).push(x);
-        return rv;
-    }, {});
 }
