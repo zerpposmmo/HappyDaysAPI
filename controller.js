@@ -125,7 +125,10 @@ function executeStatement(request, res, pathname, type) {
                                     if (err) {
                                         res.status(400).send(err.toString());
                                     } else {
-                                        res.status(200).send(resultset.toString());
+                                        res.status(200).send({
+                                            "request": pathname,
+                                            "status": "200"
+                                        });
                                     }
                                 });
                             break;
